@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapShield Responder Platform</title>
+
+    <!-- Tailwind CSS library -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom Tailwind CSS Configuration -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'primary': '#8B5CF6', // A lighter purple for the dark theme
+              'accent': '#14B8A6',
+              'light': '#EDE9FE',
+              'emergency-red': '#F87171',
+              'amber-yellow': '#FBBF24',
+              'success-green': '#34D399',
+              'charcoal': '#1F2937',
+              'slate-gray': '#374151',
+              'light-slate': '#4B5563',
+            }
+          }
+        }
+      }
+    </script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles for the Dashboard -->
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif;
+            scrollbar-width: thin;
+            scrollbar-color: #4B5563 #1F2937;
+        }
+        /* For Webkit Browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1F2937;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #4B5563;
+            border-radius: 10px;
+            border: 2px solid #1F2937;
+        }
+        .report-card.active {
+            background-color: #4B5563;
+            border-left-color: #8B5CF6;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-charcoal text-gray-200 flex flex-col h-screen">
+
+    <!-- Header -->
+    <header class="bg-slate-gray p-4 border-b border-light-slate shadow-md flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="p-2 bg-primary/20 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-white">SnapShield Responder Platform</h1>
+        </div>
+        <div>
+             <p class="text-sm text-gray-400 font-medium">Status: <span class="text-success-green">●</span> Live</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex flex-1 overflow-hidden">
+        
+        <!-- Reports Panel (Left) -->
+        <aside class="w-full md:w-1/3 lg:w-1/4 bg-slate-gray flex flex-col border-r border-light-slate overflow-y-auto">
+            <div class="p-4 border-b border-light-slate sticky top-0 bg-slate-gray z-10">
+                <h2 class="text-xl font-semibold">Incoming Reports</h2>
+                <p class="text-sm text-gray-400">Select a report to view details</p>
+            </div>
+            <div id="reports-list" class="flex-1 p-2 space-y-2">
+                <!-- Report cards will be dynamically inserted here -->
+            </div>
+        </aside>
+
+        <!-- Detail Panel (Right) -->
+        <section id="detail-panel" class="flex-1 p-6 overflow-y-auto bg-charcoal">
+            <!-- Placeholder View -->
+            <div id="detail-placeholder" class="flex items-center justify-center h-full text-center">
+                <div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-slate-gray" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+                    </svg>
+                    <h3 class="mt-2 text-xl font-medium text-gray-300">No report selected</h3>
+                    <p class="mt-1 text-sm text-gray-500">Please select a report from the list on the left.</p>
+                </div>
+            </div>
+
+            <!-- Detail Content View -->
+            <div id="detail-content" class="hidden space-y-6">
+                <!-- Header: Urgency and Timestamp -->
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm text-gray-400">Report ID: <span id="report-id" class="font-mono"></span></p>
+                        <h2 id="report-timestamp" class="text-2xl font-bold text-white"></h2>
+                    </div>
+                    <div id="report-urgency-badge" class="px-4 py-1.5 text-sm font-bold rounded-full"></div>
+                </div>
+
+                <!-- Media and Map Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Image/Video -->
+                    <div class="bg-slate-gray p-3 rounded-lg border border-light-slate">
+                        <h3 class="font-semibold mb-2 text-lg">Submitted Media</h3>
+                        <img id="report-image" src="" alt="Submitted evidence" class="w-full h-auto object-cover rounded-md bg-charcoal">
+                    </div>
+                    <!-- Map -->
+                    <div class="bg-slate-gray p-3 rounded-lg border border-light-slate">
+                        <h3 class="font-semibold mb-2 text-lg">Incident Location</h3>
+                         <img id="report-map" src="" alt="Incident location map" class="w-full h-auto object-cover rounded-md bg-charcoal">
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="bg-slate-gray p-4 rounded-lg border border-light-slate">
+                    <h3 class="font-semibold mb-2 text-lg">Description</h3>
+                    <p id="report-description" class="text-gray-300 whitespace-pre-wrap"></p>
+                </div>
+
+                <!-- Services and Actions -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div class="bg-slate-gray p-4 rounded-lg border border-light-slate">
+                        <h3 class="font-semibold mb-2 text-lg">Required Services</h3>
+                        <div id="report-services" class="flex space-x-4">
+                            <!-- Service icons will be here -->
+                        </div>
+                    </div>
+                     <div class="bg-slate-gray p-4 rounded-lg border border-light-slate">
+                        <h3 class="font-semibold mb-2 text-lg">Actions</h3>
+                        <div class="flex space-x-3">
+                             <button class="flex-1 py-2 px-4 bg-primary hover:bg-violet-500 text-white font-semibold rounded-lg shadow-md transition-all duration-300">Acknowledge</button>
+                             <button class="flex-1 py-2 px-4 bg-accent hover:bg-teal-500 text-white font-semibold rounded-lg shadow-md transition-all duration-300">Dispatch Unit</button>
+                             <button class="flex-1 py-2 px-4 bg-light-slate hover:bg-slate-500 text-white font-semibold rounded-lg shadow-md transition-all duration-300">Archive</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+<script type="module">
+    // --- MOCK DATA ---
+    // In a real application, this data would come from a real-time database like Firestore.
+    const mockReports = [
+        {
+            id: 'RPT-8A2B1',
+            timestamp: new Date(Date.now() - 1 * 60 * 1000).toISOString(), // 1 minute ago
+            urgency: 'high',
+            description: 'Multi-car collision at the main intersection near the city center. Flames visible from one vehicle. Multiple individuals appear injured and are unable to exit their cars.',
+            location: { lat: 28.3949, lng: 76.9429 },
+            imageUrl: 'https://placehold.co/600x400/dc2626/FFFFFF?text=Car+Fire',
+            services: ['police', 'ambulance', 'fire'],
+        },
+        {
+            id: 'RPT-C4D7E',
+            timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 minutes ago
+            urgency: 'medium',
+            description: 'Reports of a possible break-in. A window is shattered at a ground-floor apartment. No suspects are visible, but the area should be approached with caution.',
+            location: { lat: 28.4011, lng: 76.9450 },
+            imageUrl: 'https://placehold.co/600x400/f59e0b/FFFFFF?text=Broken+Window',
+            services: ['police'],
+        },
+        {
+            id: 'RPT-F9G3H',
+            timestamp: new Date(Date.now() - 12 * 60 * 1000).toISOString(), // 12 minutes ago
+            urgency: 'low',
+            description: 'An illegally parked truck is blocking the fire hydrant and causing a traffic obstruction on a minor street.',
+            location: { lat: 28.3905, lng: 76.9388 },
+            imageUrl: 'https://placehold.co/600x400/22c55e/FFFFFF?text=Blocked+Hydrant',
+            services: [],
+        },
+    ];
+
+    // --- UI ELEMENTS ---
+    const reportsListEl = document.getElementById('reports-list');
+    const detailPlaceholderEl = document.getElementById('detail-placeholder');
+    const detailContentEl = document.getElementById('detail-content');
+    
+    // Detail fields
+    const reportIdEl = document.getElementById('report-id');
+    const reportTimestampEl = document.getElementById('report-timestamp');
+    const reportUrgencyBadgeEl = document.getElementById('report-urgency-badge');
+    const reportImageEl = document.getElementById('report-image');
+    const reportMapEl = document.getElementById('report-map');
+    const reportDescriptionEl = document.getElementById('report-description');
+    const reportServicesEl = document.getElementById('report-services');
+
+    // --- CONFIGURATION ---
+    const urgencyConfig = {
+        low: { text: 'Low', classes: 'bg-success-green/20 text-success-green border-success-green' },
+        medium: { text: 'Medium', classes: 'bg-amber-yellow/20 text-amber-yellow border-amber-yellow' },
+        high: { text: 'High', classes: 'bg-emergency-red/20 text-emergency-red border-emergency-red' },
+    };
+
+    const serviceIcons = {
+        police: `<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.559-1.742 1.732-3.007l-6.928-12c-.822-1.424-2.859-1.424-3.681 0l-6.928 12c-.822 1.265.198 3.007 1.732 3.007z" /></svg>`,
+        ambulance: `<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
+        fire: `<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0117.657 18.657z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1014.12 11.88" /></svg>`,
+    };
+
+    // --- FUNCTIONS ---
+    
+    function displayReportDetails(reportId) {
+        const report = mockReports.find(r => r.id === reportId);
+        if (!report) return;
+
+        // Activate the correct card in the list
+        document.querySelectorAll('.report-card').forEach(card => {
+            card.classList.toggle('active', card.dataset.id === reportId);
+        });
+
+        // Show content, hide placeholder
+        detailPlaceholderEl.classList.add('hidden');
+        detailContentEl.classList.remove('hidden');
+
+        // Populate data
+        reportIdEl.textContent = report.id;
+        reportTimestampEl.textContent = new Date(report.timestamp).toLocaleString();
+        
+        const urgency = urgencyConfig[report.urgency];
+        reportUrgencyBadgeEl.textContent = urgency.text;
+        reportUrgencyBadgeEl.className = `px-4 py-1.5 text-sm font-bold rounded-full ${urgency.classes.replace('border-','bg-')}`;
+
+        reportImageEl.src = report.imageUrl;
+        reportDescriptionEl.textContent = report.description;
+
+        // Generate map URL (using a service that doesn't require an API key for demos)
+        const { lat, lng } = report.location;
+        const mapUrl = `https://static-maps.yandex.ru/1.x/?lang=en-US&ll=${lng},${lat}&z=15&l=map&size=600,300&pt=${lng},${lat},pm2rdl`;
+        reportMapEl.src = mapUrl;
+        
+        // Populate services
+        reportServicesEl.innerHTML = '';
+        if (report.services.length > 0) {
+            report.services.forEach(service => {
+                const iconHtml = serviceIcons[service];
+                if (iconHtml) reportServicesEl.innerHTML += `<div class="text-center"><div class="p-2 bg-charcoal rounded-lg">${iconHtml}</div><p class="text-xs mt-1 capitalize">${service}</p></div>`;
+            });
+        } else {
+            reportServicesEl.innerHTML = '<p class="text-gray-400 text-sm">No specific services requested.</p>';
+        }
+    }
+
+    function renderReportsList() {
+        reportsListEl.innerHTML = '';
+        mockReports.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Most recent first
+
+        mockReports.forEach((report, index) => {
+            const urgency = urgencyConfig[report.urgency];
+            const timeAgo = Math.round((new Date() - new Date(report.timestamp)) / 60000); // in minutes
+            
+            const card = document.createElement('div');
+            card.className = `report-card p-4 bg-charcoal hover:bg-light-slate cursor-pointer border-l-4 transition-colors duration-200 ${urgency.classes}`;
+            card.dataset.id = report.id;
+            
+            // Add fade-in animation to the newest report
+            if (index === 0 && timeAgo < 1) {
+                card.classList.add('animate-fade-in');
+            }
+
+            card.innerHTML = `
+                <div class="flex justify-between items-center mb-1">
+                    <p class="font-bold text-white">${report.id}</p>
+                    <p class="text-sm text-gray-400">${timeAgo} min ago</p>
+                </div>
+                <p class="text-sm text-gray-300 truncate">${report.description}</p>
+                 <div class="flex space-x-2 mt-2">
+                    ${report.services.map(s => `<span class="text-xs font-semibold bg-gray-600 px-2 py-0.5 rounded-full capitalize">${s}</span>`).join('')}
+                </div>
+            `;
+            
+            card.addEventListener('click', () => displayReportDetails(report.id));
+            reportsListEl.appendChild(card);
+        });
+    }
+
+    // --- INITIALIZATION ---
+    function init() {
+        renderReportsList();
+        
+        // Auto-select the first report on load for a better demo experience
+        if (mockReports.length > 0) {
+            displayReportDetails(mockReports[0].id);
+        }
+
+        // Simulate a new report arriving after 8 seconds
+        setTimeout(() => {
+            const newReport = {
+                id: 'RPT-X5Y1Z',
+                timestamp: new Date().toISOString(),
+                urgency: 'high',
+                description: 'A person has collapsed on the sidewalk and is unresponsive. Medical assistance required immediately.',
+                location: { lat: 28.3975, lng: 76.9499 },
+                imageUrl: 'https://placehold.co/600x400/ef4444/FFFFFF?text=Medical+Emergency',
+                services: ['ambulance', 'police'],
+            };
+            mockReports.unshift(newReport);
+            renderReportsList();
+            // Optional: Also select the new report automatically
+            displayReportDetails(newReport.id);
+        }, 8000);
+    }
+
+    init();
+
+</script>
+</body>
+</html>
