@@ -1,0 +1,885 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SnapShield (Local Demo)</title>
+        
+        <!-- Tailwind CSS library -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        
+        <!-- Custom Tailwind CSS Configuration -->
+        <script>
+        tailwind.config = {
+            theme: {
+            extend: {
+                colors: {
+                'primary': '#5B21B6',
+                'accent': '#14B8A6',
+                'light': '#EDE9FE',
+                'emergency-red': '#DC2626',
+                'amber-yellow': '#F59E0B',
+                'light-gray': '#F3F4F6',
+                'charcoal': '#111827',
+                }
+            }
+            }
+        }
+        </script>
+        
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <style>
+            body { font-family: 'Inter', sans-serif; }
+            button:disabled { opacity: 0.6; cursor: not-allowed; }
+            .urgency-btn.selected {
+                box-shadow: 0 0 0 2px white, 0 0 0 4px #5B21B6;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .animate-fade-in {
+                animation: fadeIn 1.5s ease-in-out forwards;
+            }
+        </style>
+    </head>
+    <body class="bg-light-gray flex items-center justify-center min-h-screen p-4">
+
+        <!-- Registration View -->
+        <div id="registration-view" class="bg-white p-6 md:p-8 rounded-xl shadow-lg w-full max-w-2xl border border-gray-200">
+            <div class="flex items-center space-x-2 mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <h1 class="text-xl font-bold text-charcoal">SnapShield Registration</h1>
+            </div>
+
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-charcoal">Create Your Secure Account</h2>
+                <p class="text-gray-500">Secure verification is required for authentic crime reporting.</p>
+            </div>
+            
+            <form id="registration-form" class="space-y-6">
+                <!-- Verification Method -->
+                <div>
+                    <label class="block text-base font-medium text-charcoal mb-2">Choose Verification Method</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button type="button" id="verify-digilocker-btn" class="h-auto p-4 flex flex-col items-center justify-center space-y-2 border-2 border-primary bg-light rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            <span class="font-semibold text-primary">DigiLocker</span>
+                            <span class="text-xs text-primary/80">Recommended</span>
+                        </button>
+                        <button type="button" id="verify-aadhaar-btn" class="h-auto p-4 flex flex-col items-center justify-center space-y-2 border-2 border-gray-300 bg-white rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            <span class="font-semibold text-charcoal">Aadhaar OTP</span>
+                            <span class="text-xs text-gray-500">Alternative</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Personal Info -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium text-charcoal border-b pb-2">Personal Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="fullName" class="block text-sm font-medium text-charcoal">Full Name *</label>
+                            <input type="text" id="fullName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border" required placeholder="As per verification">
+                        </div>
+                        <div>
+                            <label for="dateOfBirth" class="block text-sm font-medium text-charcoal">Date of Birth *</label>
+                            <input type="date" id="dateOfBirth" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div id="aadhaar-input-container" class="hidden">
+                            <label for="aadhaarNumber" class="block text-sm font-medium text-charcoal">Aadhaar Number *</label>
+                            <input type="text" id="aadhaarNumber" maxlength="12" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border" placeholder="xxxx-xxxx-xxxx">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium text-charcoal border-b pb-2">Contact Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="mobileNumber" class="block text-sm font-medium text-charcoal">Mobile Number *</label>
+                            <input type="tel" id="mobileNumber" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border" required placeholder="Linked to Aadhaar">
+                        </div>
+                        <div>
+                            <label for="emailAddress" class="block text-sm font-medium text-charcoal">Email Address *</label>
+                            <input type="email" id="emailAddress" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border" required placeholder="your.email@example.com">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium text-charcoal border-b pb-2">Security</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="relative">
+                            <label for="reg-password" class="block text-sm font-medium text-charcoal">Password *</label>
+                            <input type="password" id="reg-password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border" required>
+                            <button type="button" class="password-toggle absolute inset-y-0 right-0 top-6 pr-3 flex items-center text-gray-500">
+                                <svg class="h-5 w-5 eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" /></svg>
+                                <svg class="h-5 w-5 eye-closed hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7 .527-1.664 1.373-3.16 2.458-4.425L13.875 18.825z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.125 5.175A10.05 10.05 0 0112 5c4.478 0 8.268 2.943 9.542 7-.527 1.664-1.373 3.16-2.458-4.425L10.125 5.175z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <label for="confirmPassword" class="block text-sm font-medium text-charcoal">Confirm Password *</label>
+                            <input type="password" id="confirmPassword" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border" required>
+                            <button type="button" class="password-toggle absolute inset-y-0 right-0 top-6 pr-3 flex items-center text-gray-500">
+                                <svg class="h-5 w-5 eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" /></svg>
+                                <svg class="h-5 w-5 eye-closed hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7 .527-1.664 1.373-3.16 2.458-4.425L13.875 18.825z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.125 5.175A10.05 10.05 0 0112 5c4.478 0 8.268 2.943 9.542 7-.527 1.664-1.373 3.16-2.458-4.425L10.125 5.175z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Consents -->
+                <div class="space-y-3">
+                    <div class="flex items-start space-x-2">
+                        <input type="checkbox" id="terms" class="h-4 w-4 mt-1 rounded border-gray-300 text-primary focus:ring-primary">
+                        <label for="terms" class="text-sm text-gray-600">I accept the <span class="text-primary underline cursor-pointer">Terms of Service</span> *</label>
+                    </div>
+                    <div class="flex items-start space-x-2">
+                        <input type="checkbox" id="privacy" class="h-4 w-4 mt-1 rounded border-gray-300 text-primary focus:ring-primary">
+                        <label for="privacy" class="text-sm text-gray-600">I accept the <span class="text-primary underline cursor-pointer">Privacy Policy</span> *</label>
+                    </div>
+                    <div class="flex items-start space-x-2">
+                        <input type="checkbox" id="verification" class="h-4 w-4 mt-1 rounded border-gray-300 text-primary focus:ring-primary">
+                        <label for="verification" class="text-sm text-gray-600">I consent to identity verification for authentic reporting *</label>
+                    </div>
+                </div>
+                <p id="registration-error" class="text-sm text-red-600 text-center"></p>
+                <button type="submit" class="w-full py-3 px-4 bg-primary hover:bg-violet-900 text-white font-semibold rounded-lg shadow-md transition-all duration-300">
+                    Create Account & Verify
+                </button>
+                <p class="text-center text-sm">Already have an account? <button type="button" id="show-login-btn" class="font-semibold text-primary hover:underline">Login</button></p>
+            </form>
+        </div>
+
+        <!-- Login View -->
+        <div id="login-view" class="bg-white p-6 md:p-8 rounded-xl shadow-lg w-full max-w-md border border-gray-200 hidden">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <h1 class="text-xl font-bold text-charcoal">Secure Access</h1>
+                </div>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="official-id" class="block text-sm font-medium text-charcoal">Official ID</label>
+                    <input type="text" id="official-id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 p-3 border" placeholder="e.g., ADMIN01" required>
+                </div>
+                <div>
+                    <label for="passcode" class="block text-sm font-medium text-charcoal">Access Passcode</label>
+                    <input type="password" id="passcode" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 p-3 border" required>
+                </div>
+                <p id="login-error" class="text-sm text-red-600 text-center"></p>
+                <button type="submit" class="w-full py-3 px-4 bg-primary hover:bg-violet-900 text-white font-semibold rounded-lg shadow-md transition-all duration-300">
+                    Login
+                </button>
+            </form>
+            <div class="text-center mt-4 p-2 bg-amber-100 border border-amber-300 rounded-lg">
+                <p class="text-xs text-amber-800">For demo, use ID: <strong class="font-mono">ADMIN01</strong></p>
+                <p class="text-xs text-amber-800">Passcode: <strong class="font-mono">SNAPSAFE123</strong></p>
+            </div>
+            <p class="text-center text-sm mt-4">Don't have an account? <button type="button" id="show-registration-btn" class="font-semibold text-primary hover:underline">Register Now</button></p>
+        </div>
+
+        <!-- Splash Screen -->
+        <div id="splash-screen" class="fixed inset-0 bg-white flex-col items-center justify-center z-50 transition-opacity duration-1000 ease-in-out hidden">
+            <div class="animate-fade-in text-center">
+                <div class="flex justify-center items-center mb-4">
+                    <div class="p-3 bg-light rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <h1 class="text-4xl font-bold text-charcoal">SnapShield</h1>
+            </div>
+        </div>
+
+
+        <div id="app-container" class="bg-white p-6 md:p-8 rounded-xl shadow-lg w-full max-w-2xl border border-gray-200 hidden">
+            
+            <!-- Main Dashboard View -->
+            <div id="main-view">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-3 bg-light rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-charcoal">SnapShield</h1>
+                            <p class="text-sm text-gray-500">Welcome, <span id="user-id-display" class="font-semibold"></span></p>
+                        </div>
+                    </div>
+                    <button id="logout-btn" class="text-sm font-semibold text-primary hover:underline">Logout</button>
+                </div>
+                <!-- Info Cards Section -->
+                <div class="grid grid-cols-3 gap-4 mb-8 text-center">
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="font-bold text-primary">24/7</p>
+                        <p class="text-gray-500 text-sm">Available</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="font-bold text-primary">100%</p>
+                        <p class="text-gray-500 text-sm">Secure</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="font-bold text-primary">Instant</p>
+                        <p class="text-gray-500 text-sm">Alerts</p>
+                    </div>
+                </div>
+
+                <!-- Reporting Section -->
+                <div class="p-6 bg-white rounded-xl shadow-md border border-gray-200 text-center mb-8">
+                    <div class="flex items-center justify-center space-x-2 mb-2">
+                        <!-- Updated Icon: Shield -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                        <h2 class="text-xl font-semibold text-charcoal">Report an Incident</h2>
+                    </div>
+                    <p class="text-gray-500 text-sm mb-4">Capture evidence and alert authorities quickly and safely</p>
+                    <button id="start-report-btn" class="w-full py-3 px-4 bg-primary hover:bg-violet-900 text-white font-semibold rounded-lg shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                        Start Report
+                    </button>
+                </div>
+
+                <!-- Call to Action Buttons -->
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    <button id="view-reports-btn" class="flex items-center justify-center space-x-2 py-3 px-4 bg-gray-50 hover:bg-gray-100 text-charcoal font-semibold rounded-lg shadow-sm border border-gray-200 transition-all duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                        </svg>
+                        <span>View Reports</span>
+                    </button>
+                    <button id="safety-tips-btn" class="flex items-center justify-center space-x-2 py-3 px-4 bg-gray-50 hover:bg-gray-100 text-charcoal font-semibold rounded-lg shadow-sm border border-gray-200 transition-all duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M9 12a1 1 0 112 0 1 1 0 01-2 0z" />
+                            <path fill-rule="evenodd" d="M10 2a8 8 0 100 16 8 8 0 000-16zm-2.432 5.093l-.84.84a1 1 0 101.415 1.414L9 8.414V12a1 1 0 102 0V8.414l1.854 1.853a1 1 0 101.414-1.414l-2.5-2.5a1 1 0 00-1.414 0l-2.5 2.5z" clip-rule="evenodd" />
+                        </svg>
+                        <span>Safety Tips</span>
+                    </button>
+                </div>
+                
+                <!-- Emergency Alert Section -->
+                <div class="bg-emergency-red/10 p-4 rounded-lg flex items-center justify-between border border-emergency-red mb-8">
+                    <div class="flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emergency-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.559-1.742 1.732-3.007l-6.928-12c-.822-1.424-2.859-1.424-3.681 0l-6.928 12c-.822 1.265.198 3.007 1.732 3.007z" />
+                        </svg>
+                        <p class="font-semibold text-emergency-red">Life-threatening emergency?</p>
+                    </div>
+                    <a href="tel:911" class="py-2 px-4 bg-emergency-red text-white font-bold rounded-lg hover:bg-red-800 transition-all duration-300">Call 911</a>
+                </div>
+            </div>
+
+            <!-- Reporting Form View -->
+            <div id="reporting-view" class="hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-charcoal">Report an Incident</h2>
+                    <button class="back-btn text-primary font-semibold">Back</button>
+                </div>
+                <form id="report-form" class="space-y-6">
+                    <!-- Photo/Video Capture Section -->
+                    <div class="relative w-full h-48 bg-gray-200 rounded-lg overflow-hidden border-2 border-dashed border-gray-400 flex items-center justify-center cursor-pointer hover:border-primary transition-all duration-300">
+                        <div id="file-selection-placeholder" class="text-gray-500 text-center flex flex-col items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.896-1.792A2 2 0 0113.682 4H15a2 2 0 012 2v.93a2 2 0 001.664.89l.896 1.792A2 2 0 0121 11v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span class="font-medium">Tap to upload a file</span>
+                            <input type="file" id="file-input" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+                        </div>
+                        <video id="camera-stream" class="w-full h-full object-cover hidden" autoplay playsinline></video>
+                        <canvas id="camera-canvas" class="hidden"></canvas>
+                        <div id="file-preview-container" class="absolute inset-0 hidden">
+                            <img id="file-preview-image" src="#" alt="Preview" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center justify-center space-x-4">
+                        <button type="button" id="start-camera-btn" class="w-full py-3 px-4 bg-primary hover:bg-violet-900 text-white font-semibold rounded-lg shadow-md transition-all duration-300">Open Camera</button>
+                        <button type="button" id="capture-photo-btn" class="hidden w-full py-3 px-4 bg-accent hover:bg-teal-600 text-white font-semibold rounded-lg shadow-md transition-all duration-300">Take Photo</button>
+                        
+                        <button type="button" id="analyze-btn" class="hidden w-full py-3 px-4 bg-amber-yellow hover:bg-amber-600 text-white font-semibold rounded-lg shadow-md transition-all duration-300 flex items-center justify-center space-x-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Analyze Photo</span>
+                        </button>
+                        <button type="button" id="retake-photo-btn" class="hidden w-full py-3 px-4 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg shadow-md transition-all duration-300">Retake</button>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-charcoal">Description</label>
+                        <textarea id="description" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 p-3 border" placeholder="Describe the incident or use AI analysis" required></textarea>
+                    </div>
+
+                    <!-- Urgency -->
+                    <div>
+                        <label class="block text-sm font-medium text-charcoal">Set Urgency</label>
+                        <div id="urgency-selector" class="mt-2 grid grid-cols-3 gap-3">
+                            <button type="button" data-urgency="low" class="urgency-btn p-3 border-2 border-transparent rounded-lg text-center font-semibold bg-green-500 text-white transition-all duration-200">Low</button>
+                            <button type="button" data-urgency="medium" class="urgency-btn p-3 border-2 border-transparent rounded-lg text-center font-semibold bg-yellow-500 text-white transition-all duration-200">Medium</button>
+                            <button type="button" data-urgency="high" class="urgency-btn p-3 border-2 border-transparent rounded-lg text-center font-semibold bg-red-500 text-white transition-all duration-200">High</button>
+                        </div>
+                        <input type="hidden" id="urgency-value" name="urgency" required>
+                    </div>
+
+                    <!-- Services Required -->
+                    <div>
+                        <label class="block text-sm font-medium text-charcoal">Service(s) Required</label>
+                        <div id="services-selector" class="mt-2 space-y-2">
+                            <label class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg has-[:checked]:bg-light has-[:checked]:border-primary transition-all duration-200 cursor-pointer">
+                                <input type="checkbox" name="service" value="police" class="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary">
+                                <span class="font-medium text-charcoal">Police</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg has-[:checked]:bg-light has-[:checked]:border-primary transition-all duration-200 cursor-pointer">
+                                <input type="checkbox" name="service" value="ambulance" class="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary">
+                                <span class="font-medium text-charcoal">Ambulance</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg has-[:checked]:bg-light has-[:checked]:border-primary transition-all duration-200 cursor-pointer">
+                                <input type="checkbox" name="service" value="fire" class="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary">
+                                <span class="font-medium text-charcoal">Fire</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" id="submit-btn" class="w-full flex justify-center items-center py-3 px-4 bg-primary hover:bg-violet-900 text-white font-semibold rounded-lg shadow-md transition-all duration-300">
+                        Submit Report
+                    </button>
+                </form>
+            </div>
+
+            <!-- Reports List View -->
+            <div id="reports-view" class="hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-charcoal">Submitted Reports</h2>
+                    <button class="back-btn text-primary font-semibold">Back</button>
+                </div>
+                <div id="reports-list" class="space-y-4">
+                    <!-- Reports will be dynamically inserted here -->
+                </div>
+            </div>
+            
+            <div id="message-box" class="fixed inset-x-4 top-4 z-50 transition-all duration-300 transform scale-0 opacity-0">
+                <div class="bg-primary text-white p-4 rounded-lg shadow-xl text-center flex items-center justify-center space-x-2">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span id="message-text"></span>
+                </div>
+            </div>
+        </div>
+
+        <script type="module">
+            // Local state for the application
+            let localReports = [];
+            let loggedInUser = null;
+            let mediaStream = null;
+
+            // UI elements
+            const registrationView = document.getElementById('registration-view');
+            const registrationForm = document.getElementById('registration-form');
+            const loginView = document.getElementById('login-view');
+            const loginForm = document.getElementById('login-form');
+            const officialIdInput = document.getElementById('official-id');
+            const passcodeİnput = document.getElementById('passcode');
+            const loginError = document.getElementById('login-error');
+            const registrationError = document.getElementById('registration-error');
+            const showLoginBtn = document.getElementById('show-login-btn');
+            const showRegistrationBtn = document.getElementById('show-registration-btn');
+
+            const splashScreen = document.getElementById('splash-screen');
+            const appContainer = document.getElementById('app-container');
+            const mainView = document.getElementById('main-view');
+            const reportingView = document.getElementById('reporting-view');
+            const reportsView = document.getElementById('reports-view');
+            
+            const startReportBtn = document.getElementById('start-report-btn');
+            const viewReportsBtn = document.getElementById('view-reports-btn');
+            const backBtns = document.querySelectorAll('.back-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const userIdDisplay = document.getElementById('user-id-display');
+            
+            const reportForm = document.getElementById('report-form');
+            const fileInput = document.getElementById('file-input');
+            const fileSelectionPlaceholder = document.getElementById('file-selection-placeholder');
+            const filePreviewContainer = document.getElementById('file-preview-container');
+            const filePreviewImage = document.getElementById('file-preview-image');
+            const cameraStream = document.getElementById('camera-stream');
+            const cameraCanvas = document.getElementById('camera-canvas');
+            const startCameraBtn = document.getElementById('start-camera-btn');
+            const capturePhotoBtn = document.getElementById('capture-photo-btn');
+            const retakePhotoBtn = document.getElementById('retake-photo-btn');
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const descriptionInput = document.getElementById('description');
+            const submitBtn = document.getElementById('submit-btn');
+            const reportsList = document.getElementById('reports-list');
+            const messageBox = document.getElementById('message-box');
+            const messageText = document.getElementById('message-text');
+            const urgencySelector = document.getElementById('urgency-selector');
+            const urgencyValueInput = document.getElementById('urgency-value');
+            const urgencyBtns = document.querySelectorAll('.urgency-btn');
+            const passwordToggles = document.querySelectorAll('.password-toggle');
+
+            const verifyDigilockerBtn = document.getElementById('verify-digilocker-btn');
+            const verifyAadhaarBtn = document.getElementById('verify-aadhaar-btn');
+            const aadhaarInputContainer = document.getElementById('aadhaar-input-container');
+
+            // Show a temporary message box
+            const showMessage = (text, isError = false) => {
+                messageText.textContent = text;
+                messageBox.firstElementChild.className = isError 
+                    ? 'bg-emergency-red text-white p-4 rounded-lg shadow-xl text-center flex items-center justify-center space-x-2'
+                    : 'bg-primary text-white p-4 rounded-lg shadow-xl text-center flex items-center justify-center space-x-2';
+                messageBox.classList.remove('scale-0', 'opacity-0');
+                messageBox.classList.add('scale-100', 'opacity-100');
+                setTimeout(() => {
+                    messageBox.classList.remove('scale-100', 'opacity-100');
+                    messageBox.classList.add('scale-0', 'opacity-0');
+                }, 4000);
+            };
+
+            const stopCamera = () => {
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(track => track.stop());
+                    mediaStream = null;
+                }
+            };
+
+            const navigateTo = (view) => {
+                stopCamera();
+                mainView.classList.add('hidden');
+                reportingView.classList.add('hidden');
+                reportsView.classList.add('hidden');
+
+                if (view === 'report') reportingView.classList.remove('hidden');
+                else if (view === 'reports') {
+                    reportsView.classList.remove('hidden');
+                    displayReports();
+                }
+                else mainView.classList.remove('hidden');
+            };
+
+            startReportBtn.addEventListener('click', () => navigateTo('report'));
+            viewReportsBtn.addEventListener('click', () => navigateTo('reports'));
+            backBtns.forEach(btn => btn.addEventListener('click', () => navigateTo('main')));
+
+            const getCurrentLocation = () => Promise.resolve({ lat: 28.3949, lng: 76.9429 });
+            
+            // ---- Auth Toggle Logic ----
+            showLoginBtn.addEventListener('click', () => {
+                registrationView.classList.add('hidden');
+                loginView.classList.remove('hidden');
+            });
+            showRegistrationBtn.addEventListener('click', () => {
+                loginView.classList.add('hidden');
+                registrationView.classList.remove('hidden');
+            });
+
+            // ---- Auth Logic ----
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = officialIdInput.value;
+                const passcode = passcodeİnput.value;
+
+                if (id === 'ADMIN01' && passcode === 'SNAPSAFE123') {
+                    loggedInUser = { fullName: 'Admin User' }; // Simplified for demo
+                    userIdDisplay.textContent = loggedInUser.fullName;
+                    loginError.textContent = '';
+                    loginView.classList.add('hidden');
+                    
+                    splashScreen.classList.remove('hidden');
+                    splashScreen.classList.remove('opacity-0');
+
+                    setTimeout(() => {
+                        splashScreen.classList.add('opacity-0');
+                        setTimeout(() => {
+                            splashScreen.classList.add('hidden');
+                            appContainer.classList.remove('hidden');
+                            displayReports();
+                        }, 1000);
+                    }, 2000);
+
+                } else {
+                    loginError.textContent = 'Invalid ID or Passcode. Please try again.';
+                }
+            });
+
+            registrationForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const password = document.getElementById('reg-password').value;
+                const confirm = document.getElementById('confirmPassword').value;
+                const terms = document.getElementById('terms').checked;
+                const privacy = document.getElementById('privacy').checked;
+                const verification = document.getElementById('verification').checked;
+
+                registrationError.textContent = '';
+
+                if (password !== confirm) {
+                    registrationError.textContent = 'Passwords do not match.';
+                    return;
+                }
+                if (!terms || !privacy || !verification) {
+                    registrationError.textContent = 'Please accept all required consents.';
+                    return;
+                }
+
+                const fullName = document.getElementById('fullName').value;
+                if (!fullName) {
+                    registrationError.textContent = 'Full Name is required.';
+                    return;
+                }
+                
+                loggedInUser = { fullName };
+                userIdDisplay.textContent = loggedInUser.fullName;
+
+                showMessage('Registration Successful! Welcome.');
+                registrationView.classList.add('hidden');
+
+                splashScreen.classList.remove('hidden');
+                setTimeout(() => {
+                    splashScreen.classList.add('opacity-0');
+                    setTimeout(() => {
+                        splashScreen.classList.add('hidden');
+                        appContainer.classList.remove('hidden');
+                        displayReports();
+                    }, 1000);
+                }, 1500);
+            });
+
+
+            logoutBtn.addEventListener('click', () => {
+                loggedInUser = null;
+                appContainer.classList.add('hidden');
+                registrationView.classList.remove('hidden'); // Go back to registration
+                registrationForm.reset();
+                navigateTo('main');
+            });
+
+
+            // ---- Camera and File Logic ----
+            function showPhotoActions() {
+                startCameraBtn.classList.add('hidden');
+                capturePhotoBtn.classList.add('hidden');
+                analyzeBtn.classList.remove('hidden');
+                retakePhotoBtn.classList.remove('hidden');
+            }
+            
+            startCameraBtn.addEventListener('click', async () => {
+                try {
+                    mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    cameraStream.srcObject = mediaStream;
+                    fileSelectionPlaceholder.classList.add('hidden');
+                    cameraStream.classList.remove('hidden');
+                    startCameraBtn.classList.add('hidden');
+                    capturePhotoBtn.classList.remove('hidden');
+                } catch (error) {
+                    console.error("Error accessing camera: ", error);
+                    showMessage('Error: Could not access camera.', true);
+                }
+            });
+
+            capturePhotoBtn.addEventListener('click', () => {
+                cameraCanvas.width = cameraStream.videoWidth;
+                cameraCanvas.height = cameraStream.videoHeight;
+                cameraCanvas.getContext('2d').drawImage(cameraStream, 0, 0);
+                stopCamera();
+                filePreviewImage.src = cameraCanvas.toDataURL('image/jpeg');
+                cameraStream.classList.add('hidden');
+                filePreviewContainer.classList.remove('hidden');
+                showPhotoActions();
+            });
+            
+            const resetMediaSelection = () => {
+                filePreviewContainer.classList.add('hidden');
+                filePreviewImage.src = '#';
+                fileInput.value = '';
+                fileSelectionPlaceholder.classList.remove('hidden');
+                retakePhotoBtn.classList.add('hidden');
+                analyzeBtn.classList.add('hidden');
+                startCameraBtn.classList.remove('hidden');
+                cameraStream.classList.add('hidden');
+                descriptionInput.value = ''; // Clear description on retake
+                stopCamera();
+            };
+
+            retakePhotoBtn.addEventListener('click', resetMediaSelection);
+
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    filePreviewImage.src = URL.createObjectURL(file);
+                    fileSelectionPlaceholder.classList.add('hidden');
+                    filePreviewContainer.classList.remove('hidden');
+                    showPhotoActions();
+                }
+            });
+
+            // ---- AI Analysis Logic ----
+            async function getBase64FromImageSrc(src) {
+                if (src.startsWith('data:image')) return src.split(',')[1];
+                if (src.startsWith('blob:')) {
+                    const response = await fetch(src);
+                    const blob = await response.blob();
+                    return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    });
+                }
+                return null;
+            }
+
+            analyzeBtn.addEventListener('click', async () => {
+                const originalButtonText = analyzeBtn.innerHTML;
+                analyzeBtn.disabled = true;
+                analyzeBtn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span class="ml-2">Analyzing...</span>`;
+                descriptionInput.placeholder = "AI is analyzing the image...";
+
+                try {
+                    const base64ImageData = await getBase64FromImageSrc(filePreviewImage.src);
+                    if (!base64ImageData) throw new Error("Could not get image data.");
+
+                    const apiKey = ""; // Leave blank
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                    const prompt = `Analyze the attached image for an emergency report. Based on visual evidence, provide a factual description and determine required services from ["police", "ambulance", "fire"]. Return a JSON object with "description" and "services" keys.`;
+                    
+                    const responseSchema = {
+                        type: "OBJECT",
+                        properties: {
+                            "description": { "type": "STRING" },
+                            "services": {
+                                "type": "ARRAY",
+                                "items": { "type": "STRING", "enum": ["police", "ambulance", "fire"] }
+                            }
+                        },
+                        required: ["description", "services"]
+                    };
+
+                    const payload = {
+                        contents: [{
+                            parts: [
+                                { text: prompt },
+                                { inlineData: { mimeType: "image/jpeg", data: base64ImageData } }
+                            ]
+                        }],
+                        generationConfig: {
+                            responseMimeType: "application/json",
+                            responseSchema: responseSchema
+                        }
+                    };
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+
+                    const result = await response.json();
+                    
+                    if (!result.candidates || result.candidates.length === 0) {
+                        let errorMessage = "AI could not process the image.";
+                        if (result.promptFeedback?.blockReason) {
+                            errorMessage = `Image blocked by AI for safety reasons (${result.promptFeedback.blockReason}).`;
+                        }
+                        throw new Error(errorMessage);
+                    }
+
+                    const responseText = result.candidates[0]?.content?.parts?.[0]?.text;
+                    
+                    if (responseText) {
+                        const parsedJson = JSON.parse(responseText);
+                        descriptionInput.value = parsedJson.description;
+                        
+                        document.querySelectorAll('input[name="service"]').forEach(cb => cb.checked = false);
+                        
+                        if (parsedJson.services && parsedJson.services.length > 0) {
+                            parsedJson.services.forEach(service => {
+                                const checkbox = document.querySelector(`input[name="service"][value="${service}"]`);
+                                if (checkbox) checkbox.checked = true;
+                            });
+                        }
+                        showMessage("AI analysis complete!");
+                    } else {
+                        throw new Error("AI model returned an empty response. This might be due to safety filters.");
+                    }
+
+                } catch (error) {
+                    console.error("AI Analysis Error:", error);
+                    showMessage(error.message, true);
+                    descriptionInput.placeholder = "Describe the incident or use AI analysis";
+                } finally {
+                    analyzeBtn.disabled = false;
+                    analyzeBtn.innerHTML = originalButtonText;
+                }
+            });
+
+            // Urgency button handler
+            urgencySelector.addEventListener('click', (e) => {
+                const selectedBtn = e.target.closest('.urgency-btn');
+                if (!selectedBtn) return;
+                urgencyBtns.forEach(btn => btn.classList.remove('selected'));
+                selectedBtn.classList.add('selected');
+                urgencyValueInput.value = selectedBtn.dataset.urgency;
+            });
+            
+            // Handle form submission locally
+            reportForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const urgency = urgencyValueInput.value;
+                const selectedServices = Array.from(document.querySelectorAll('input[name="service"]:checked')).map(cb => cb.value);
+
+                if (!urgency) { showMessage("Please select an urgency level.", true); return; }
+                if (selectedServices.length === 0) { showMessage("Please select at least one required service.", true); return; }
+
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Submitting...`;
+
+                let fileUrl = null;
+                let fileType = null;
+
+                if (filePreviewImage.src.startsWith('data:image') || filePreviewImage.src.startsWith('blob:')) {
+                    fileUrl = filePreviewImage.src;
+                    if (fileInput.files.length > 0) fileType = fileInput.files[0].type;
+                    else fileType = 'image/jpeg';
+                } else {
+                    showMessage("Please take a photo or upload a file.", true);
+                    submitBtn.disabled = false; submitBtn.textContent = 'Submit Report'; return;
+                }
+
+                try {
+                    const description = descriptionInput.value;
+                    const location = await getCurrentLocation();
+                    const newReport = { id: Date.now(), userId: loggedInUser.fullName, description, urgency, location, fileUrl, fileType, services: selectedServices, created_at: new Date().toISOString() };
+                    localReports.push(newReport);
+                    showMessage('Report submitted locally!');
+                    reportForm.reset();
+                    resetMediaSelection();
+                    urgencyValueInput.value = '';
+                    urgencyBtns.forEach(btn => btn.classList.remove('selected'));
+                    
+                    setTimeout(() => {
+                        navigateTo('main');
+                        submitBtn.disabled = false; submitBtn.textContent = 'Submit Report';
+                    }, 500);
+
+                } catch (error) {
+                    console.error("Error submitting report: ", error);
+                    showMessage(`Error: ${error.message}`, true);
+                    submitBtn.disabled = false; submitBtn.textContent = 'Submit Report';
+                }
+            });
+
+            // Display reports from local array
+            const displayReports = () => {
+                reportsList.innerHTML = '';
+                if (localReports.length === 0) { reportsList.innerHTML = '<p class="text-center text-gray-500">No reports have been submitted yet.</p>'; return; }
+                localReports.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                localReports.forEach(report => {
+                    const reportElement = document.createElement('div');
+                    reportElement.className = 'bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200';
+                    const urgencyColors = { high: 'text-red-600', medium: 'text-yellow-600', low: 'text-green-600' };
+                    const urgencyColorClass = urgencyColors[report.urgency] || 'text-gray-500';
+                    let fileHtml = '';
+                    if (report.fileUrl) {
+                        if (report.fileType?.startsWith('image/')) fileHtml = `<img src="${report.fileUrl}" alt="Report Photo" class="rounded-md w-full max-h-96 object-cover mb-4">`;
+                        else if (report.fileType?.startsWith('video/')) fileHtml = `<video src="${report.fileUrl}" controls class="rounded-md w-full h-auto mb-4"></video>`;
+                    }
+                    let servicesHtml = '';
+                    if (report.services && report.services.length > 0) {
+                        const serviceBadges = report.services.map(service => `<span class="inline-block bg-gray-200 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full capitalize">${service}</span>`).join('');
+                        servicesHtml = `<div class="mt-3"><p class="text-sm font-medium text-gray-600">Services Required:</p><div class="flex flex-wrap gap-2 mt-1">${serviceBadges}</div></div>`;
+                    }
+                    reportElement.innerHTML = ` ${fileHtml} <div class="flex items-center justify-between text-sm text-gray-500 mb-2"> <div class="flex items-center space-x-2"> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> <span>${new Date(report.created_at).toLocaleString()}</span> </div> <span class="font-semibold text-gray-600">By: ${report.userId}</span> </div> <p class="text-charcoal font-medium break-words">${report.description}</p> <p class="text-gray-500 text-sm mt-1">Urgency: <span class="font-semibold ${urgencyColorClass} capitalize">${report.urgency}</span></p> ${servicesHtml} `;
+                    reportsList.appendChild(reportElement);
+                });
+            };
+            
+            // ---- Verification and Password Toggle ----
+            verifyDigilockerBtn.addEventListener('click', () => {
+                aadhaarInputContainer.classList.add('hidden');
+                document.getElementById('aadhaarNumber').required = false;
+                verifyDigilockerBtn.classList.add('border-primary', 'bg-light');
+                verifyDigilockerBtn.classList.remove('border-gray-300', 'bg-white');
+                verifyAadhaarBtn.classList.add('border-gray-300', 'bg-white');
+                verifyAadhaarBtn.classList.remove('border-primary', 'bg-light');
+                
+                // Mock DigiLocker Auth
+                showMessage("Connecting to DigiLocker for verification...");
+                setTimeout(() => {
+                    document.getElementById('fullName').value = "Demo User";
+                    document.getElementById('dateOfBirth').value = "1990-01-01";
+                    document.getElementById('mobileNumber').value = "9876543210";
+                    showMessage("Details auto-filled from DigiLocker.");
+                }, 1500);
+            });
+
+            verifyAadhaarBtn.addEventListener('click', () => {
+                aadhaarInputContainer.classList.remove('hidden');
+                document.getElementById('aadhaarNumber').required = true;
+                verifyAadhaarBtn.classList.add('border-primary', 'bg-light');
+                verifyAadhaarBtn.classList.remove('border-gray-300', 'bg-white');
+                verifyDigilockerBtn.classList.add('border-gray-300', 'bg-white');
+                verifyDigilockerBtn.classList.remove('border-primary', 'bg-light');
+            });
+
+            passwordToggles.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const input = btn.previousElementSibling;
+                    const eyeOpen = btn.querySelector('.eye-open');
+                    const eyeClosed = btn.querySelector('.eye-closed');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        eyeOpen.classList.add('hidden');
+                        eyeClosed.classList.remove('hidden');
+                    } else {
+                        input.type = 'password';
+                        eyeOpen.classList.remove('hidden');
+                        eyeClosed.classList.add('hidden');
+                    }
+                });
+            });
+
+
+            window.onload = () => {
+                console.log("Initializing SnapShield (Secure Access)...");
+                appContainer.classList.add('hidden');
+
+                // Check URL hash to show the correct view
+                if (window.location.hash === '#login') {
+                    registrationView.classList.add('hidden');
+                    loginView.classList.remove('hidden');
+                } else {
+                    // Default to registration view
+                    registrationView.classList.remove('hidden');
+                    loginView.classList.add('hidden');
+                }
+            };
+        </script>
+    </body>
+    </html>
+
